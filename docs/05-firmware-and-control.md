@@ -6,7 +6,7 @@ mechanics are modest; the product lives or dies on how the pull *feels*.
 ## Stack
 
 - **PlatformIO + Arduino-ESP32** (or ESP-IDF if you prefer): mature encoder (PCNT) and
-  PWM (LEDC/MCPWM) support, ESP-NOW, async web server.
+  PWM (LEDC/MCPWM) support, I2C, async web server.
 - Control loop at **200–500 Hz** pinned to core 1; WiFi/dashboard/telemetry on core 0.
 - A **web dashboard** (ESP32 as AP, WebSocket streaming) from day one: live plots of line
   position, velocity, current, phase state, and sliders for gains. You will tune 10× faster
@@ -19,8 +19,8 @@ mechanics are modest; the product lives or dies on how the pull *feels*.
 | Line position `x` (mm) | Encoder counts × calibration | Amplitude, stroke limits |
 | Line velocity `v` (mm/s) | Filtered derivative of `x` | **Phase** (sign of v), pump timing |
 | Motor current `I` | ACS712 via ADC | Tension estimate, force limit, fault detection |
-| Swing rate `ω` | Clip IMU gyro (Phase 3+) | Phase before tension exists, amplitude, occupancy |
-| Tilt/accel | Clip IMU accel | "Person climbing in/out" detection, absolute amplitude |
+| Swing rate `ω` | Onboard IMU gyro (Phase 3+) | Phase before tension exists, amplitude, occupancy |
+| Tilt/accel | Onboard IMU accel | "Person climbing in/out" detection, absolute amplitude |
 
 ## The control law: tension-mode pumping
 
@@ -82,12 +82,12 @@ stateDiagram-v2
 - **SEED:** if the hammock is still, a stationary tug produces no oscillation to lock
   onto. Seed by pulling at the *estimated* natural frequency (start at 0.45 Hz, sweep
   0.3–0.6 Hz) with small strokes until the encoder shows growing oscillation, then hand
-  over to the self-synchronizing pump. With the IMU clip, skip the sweep: any residual
-  micro-swing gives the gyro a phase to start from.
-- **Occupancy change:** the IMU sees the large transient of someone climbing in/out →
-  immediately drop to `T_idle`, return to IDLE, require explicit restart. (Without the
-  IMU: a step change in mean line position + current signature works but is cruder — a
-  real robustness argument for Phase 3.)
+  over to the self-synchronizing pump. Once the IMU is integrated (Phase 3), skip the
+  sweep: any residual micro-swing gives the gyro a phase to start from.
+- **Occupancy change:** the IMU (riding on the hammock with the pod) sees the large
+  transient of someone climbing in/out → immediately drop to `T_idle`, return to IDLE,
+  require explicit restart. (Without the IMU: a step change in mean line position +
+  current signature works but is cruder — a real robustness argument for Phase 3.)
 
 ## Safety in firmware (mirrors [doc 08](08-safety.md))
 
@@ -97,12 +97,20 @@ stateDiagram-v2
   ESP32 releases the motor).
 - FAULT requires human reset — no auto-retry into a person.
 
-## ESP-NOW clip protocol (Phase 3)
+## IMU integration (Phase 3)
 
-Clip sends a ~16-byte packet at 25 Hz: `seq, gyro_z, accel_x/y/z, batt_mV, checksum`.
-Main unit treats it as advisory: fuse gyro phase with encoder phase when fresh; fall back
-to encoder-only seamlessly when packets drop (they will — plan for it, then it's a
-non-event). Complementary filter is plenty; save the Kalman rabbit hole for v3.
+The IMU is on the pod's own I2C bus — read it directly at 50–100 Hz in the control task.
+Two firmware notes:
+
+- **Vibration rejection:** the IMU shares a box with a gearmotor, but the signals live in
+  different worlds — the swing is at 0.45 Hz, gear/motor vibration is >50 Hz. A low-pass
+  filter (even a simple 2 Hz single-pole IIR on gyro and accel) separates them cleanly.
+  Verify on the dashboard plots: the filtered gyro trace should be a clean sinusoid while
+  the motor pulls.
+- **Fusion:** treat the IMU as advisory on top of the encoder — use gyro phase for
+  startup and cross-checking, accel for amplitude and occupancy transients, and fall back
+  to encoder-only if the IMU ever misbehaves. Complementary filter is plenty; save the
+  Kalman rabbit hole for v3.
 
 ## Tuning plan (bench, before any human)
 

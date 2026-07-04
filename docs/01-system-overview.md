@@ -39,7 +39,7 @@ Take a 90 kg person + hammock rocking to θ₀ = 10° (a relaxed, pleasant ampli
 
 The hammock's horizontal excursion at ±10° is `x = L sin θ₀` ≈ ±0.21 m, so the tether pays
 in and out by roughly **0.3–0.4 m each cycle** (depending on attachment geometry). To
-inject ~4 J while the hammock swings toward the device, pulling over ~0.15–0.20 m of that
+inject ~4 J while the hammock swings toward the anchor, pulling over ~0.15–0.20 m of that
 stroke:
 
 ```
@@ -55,9 +55,9 @@ sized from these numbers.
 ## How the pumping works
 
 To add energy to a pendulum, apply force **in the direction of motion**. A tether can only
-pull, so the winch:
+pull, so the winch (riding on the hammock, tethered to a fixed anchor):
 
-1. **Pulls** (winds in, with the pump force) while the hammock moves *toward* the railing.
+1. **Pulls** (winds in, with the pump force) while the hammock moves *toward* the anchor.
 2. **Pays out** (unwinds, keeping just enough tension that the line never goes slack) while
    the hammock moves *away*.
 
@@ -70,6 +70,11 @@ line tension:        [ light ]  [ PULL 30N ]  [ light ]
 motor:               pay out     wind in      pay out
 ```
 
+It makes no difference to the physics which end of the line the motor sits at — a winch on
+the hammock reeling itself toward a fixed anchor produces exactly the same forces as a
+winch on the railing reeling the hammock in. Mounting it on the hammock is what lets the
+motor, IMU, controller, and battery share one enclosure and one charger.
+
 This is exactly how you push a child on a swing: a well-timed nudge once per cycle, in
 phase with the velocity. The controller's whole job is (a) knowing the phase and (b)
 modulating the pull strength to hold a target amplitude. See
@@ -78,24 +83,20 @@ modulating the pull strength to hold a target amplitude. See
 ### The key control insight: tension control is self-synchronizing
 
 If the winch runs in *tension mode* — "always keep ~2 N on the line; when the line starts
-coming back toward you, pull with 30 N instead" — the hammock itself dictates the timing.
-There is no clock to synchronize, no phase-locked loop to tune. The encoder on the motor
-tells you which way the line is moving, and that *is* the phase signal. The IMU in the clip
-then becomes a **refinement** (better amplitude estimation, works before tension is
-established, detects a person climbing in/out), not a prerequisite. This ordering is what
-makes the [build plan](07-build-plan.md) low-risk.
+coming back in, pull with 30 N instead" — the hammock itself dictates the timing. There is
+no clock to synchronize, no phase-locked loop to tune. The encoder on the motor tells you
+which way the line is moving, and that *is* the phase signal. The IMU (which rides in the
+same pod, on the swinging body) then becomes a **refinement** (better amplitude estimation,
+works before tension is established, detects a person climbing in/out), not a prerequisite.
+This ordering is what makes the [build plan](07-build-plan.md) low-risk.
 
 ## System architecture
 
 ```mermaid
 flowchart TB
-    subgraph CLIP["Hammock clip pod (3D printed, carabiner-mounted)"]
-        IMU["6-DoF IMU<br/>(accel + gyro)"] --> MCU2["XIAO ESP32-C3"]
-        LIPO["LiPo 500mAh<br/>USB-C charged"] --> MCU2
-    end
-
-    subgraph MAIN["Railing unit (3D-printed clamp + enclosure)"]
-        MCU1["ESP32 devkit"]
+    subgraph POD["Hammock pod (3D printed, strapped to hammock edge)"]
+        MCU["ESP32 devkit"]
+        IMU["6-DoF IMU<br/>(accel + gyro, I2C)"]
         DRV["Motor driver"]
         MOT["Brushed DC gearmotor<br/>+ quadrature encoder"]
         SPOOL["Spool + fairlead"]
@@ -103,27 +104,34 @@ flowchart TB
         SENSE["Current sensor"]
 
         PWR --> DRV --> MOT --> SPOOL
-        PWR -->|buck 5V| MCU1
-        MCU1 -->|PWM + DIR| DRV
-        MOT -->|encoder A/B| MCU1
-        SENSE --> MCU1
+        PWR -->|buck 5V| MCU
+        IMU -->|I2C, centimeters| MCU
+        MCU -->|PWM + DIR| DRV
+        MOT -->|encoder A/B| MCU
+        SENSE --> MCU
     end
 
-    MCU2 -.->|"ESP-NOW, 25 Hz<br/>quaternion/gyro packets"| MCU1
-    SPOOL ===|"2mm Dyneema, 2–3 m"| CLIP
-    MCU1 <-->|"WiFi AP — web dashboard<br/>for tuning & live plots"| PHONE["Your phone"]
+    SPOOL ===|"2mm Dyneema, 2–3 m"| ANCHOR["Railing anchor:<br/>webbing loop + carabiner<br/>(passive — no electronics)"]
+    MCU <-->|"WiFi AP — web dashboard<br/>for tuning & live plots"| PHONE["Your phone"]
 ```
+
+One battery powers everything; one USB-C port recharges it. The anchor side is dumb
+hardware from the climbing aisle. Because the pod is on the swinging body, the IMU
+measures the hammock's motion directly — your original design goal — while sitting
+centimeters from the ESP32, so it connects over ordinary I2C with none of the
+long-cable or radio-link problems a split design would have.
 
 ## Placement geometry (matters more than it looks)
 
 - **Swing direction:** a hammock rocks *side-to-side*, perpendicular to its long axis. The
-  railing unit must sit on the side of the hammock, and the clip should attach at the
-  hammock's edge (or to a ridgeline point above the occupant's hip), so the line pulls
-  along the direction of swing.
+  anchor must be off to the side of the hammock, and the pod straps to the hammock's edge
+  (or a ridgeline point above the occupant's hip) facing it, so the line pulls along the
+  direction of swing.
 - **Height:** pull as close to horizontal as you can at the hammock's resting height. A
-  balcony railing (~1.0–1.1 m) pulling on a hammock bed at 0.5–0.7 m gives a shallow
-  downward angle — fine. Efficiency scales with the cosine of the angle between line and
-  motion; keep it under ~30°.
+  balcony railing (~1.0–1.1 m) and a hammock edge at 0.5–0.7 m gives a shallow angle —
+  fine. Efficiency scales with the cosine of the angle between line and motion; keep it
+  under ~30°. Loop the anchor strap low on the railing (around a baluster near the floor)
+  if the geometry wants it.
 - **Distance:** 1.5–3 m of line is the sweet spot. Too close and the line angle changes
   a lot over the stroke (nonlinear, harder on control); too far and sag/whip in the line
   gets annoying.
@@ -132,9 +140,10 @@ flowchart TB
 
 | Decision | Choice | Rejected alternatives & why |
 |---|---|---|
-| Actuation | Winch (spool + line) | Crank arm: fixed stroke, can't adapt to hammocks/positions. Linear actuator: far too slow (~0.05 m/s). Fan/propeller: comically inefficient at these forces. |
+| Actuation | Winch (spool + line) to a fixed anchor | Crank arm: fixed stroke, can't adapt. Linear actuator: far too slow. Shifting-mass box (no tether): would need to shuttle several kg to inject the energy a 30 N tug provides — heavy and power-hungry. |
+| Motor location | On the hammock, in one pod with everything else | On the railing: quieter at the ear and nothing rides on the hammock, but needs a second battery + radio for the IMU (or a failure-prone wired run), an engineered clamp with torque bracing, and a second thing to charge. The electronics are position-agnostic, so this remains a re-housing option if noise annoys. |
 | Motor | Brushed DC gearmotor + encoder | Stepper: poor torque at 0.6 m/s line speed, loud, wastes hold current. BLDC + FOC: lovely but overkill complexity. Sail-winch servo: viable for a quick hack but limited travel and no torque control. |
 | Gear ratio | Moderate (~30:1), backdrivable spur/helical | Worm gear: **not backdrivable** — the away-swing would jerk to a stop; also fails dangerous instead of failing soft. |
-| Phase sensing | Winch encoder (primary), clip IMU (refinement) | IMU-only: works, but you get the encoder for free and it derisks the build. |
-| Clip link | Wireless (ESP-NOW) | Wired I2C: out of spec over 2–3 m and noisy next to motor PWM. Wired UART: workable fallback, documented in [doc 03](03-sensing-and-tether.md). |
-| Power | USB-C PD power bank + 12V trigger | Integrated 3S pack: better v2, but battery management is a whole subproject; do it after the fun part works. |
+| Phase sensing | Winch encoder (primary), onboard IMU (refinement) | IMU-only: works, but the encoder is free and derisks the build. |
+| IMU connection | I2C on the pod's own board stack | The split-unit designs need I2C over 2–3 m (out of spec, noisy) or a radio link — the pod layout makes the problem vanish. |
+| Power | One USB-C PD power bank + 12V trigger, in the pod | Integrated 3S pack: slimmer v2, but battery management is a whole subproject; do it after the fun part works. |
