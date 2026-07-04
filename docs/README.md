@@ -8,6 +8,15 @@ This documentation is a research assignment result: it covers the physics, the c
 choices (with specific part recommendations), the design trade-offs, and a phased build
 plan that gets to a working rocker as early as possible.
 
+## Interactive 3D viewer
+
+**[diagrams/hammockpro-3d.html](diagrams/hammockpro-3d.html)** is a self-contained,
+interactive 3D companion to these docs — the whole system rocking (with the pull /
+pay-out phases shown live on the line), an exploding view of the pod's internals, the
+fabric button anchor in cut-away cross-section, and the railing anchor. GitHub doesn't
+render HTML in the browser, so download the file and open it locally (it works offline;
+everything is embedded).
+
 ## Reading order
 
 | Doc | What's in it |
