@@ -55,9 +55,11 @@ a curious kid or pet nearby. Non-negotiable pod design rules:
   post sees only ~80 N — trivial — but confirm the railing member isn't rusted or loose,
   and that building rules allow attaching to it. Loop around a structural member, not a
   decorative infill panel.
-- **Pod side:** the strap carries the pod (~0.7 kg) plus the pull force; inspect the girth
-  hitch and the hammock fabric under it during the first sessions. On ultralight nylon,
-  pad the strap ([doc 02](02-motor-and-winch.md)).
+- **Pod side:** the button anchors / strap carry the pod (~0.7 kg) plus the pull force.
+  The fabric attachment must be a **geometric interlock, never a friction/magnet grip** —
+  friction grips loaded in shear fail suddenly and silently under cyclic tugs, dropping a
+  live winch onto the occupant ([doc 02](02-motor-and-winch.md)). Inspect the fabric at
+  the buttons/hitch during the first sessions; pad on ultralight nylon.
 - Nothing on a balcony should be able to fall outward: the pod hangs inboard on the
   hammock and the anchor is a closed loop — keep it that way (no hooking the line over the
   rail top).

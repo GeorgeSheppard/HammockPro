@@ -22,16 +22,19 @@ make a working rocker.
 | Kill switch | NC toggle/mushroom, panel-mount | $5 | Wired to driver enable, reachable from the hammock |
 | Pull line | 2mm Dyneema/SK78 cord, 5–10m | $8 | "Throwline" listings work |
 | Fairlead bearing | 608ZZ bearing | $1 | Printed sheave around it |
-| Pod strap | 1m of 25mm webbing (+ tri-glide or sewn loop) | $4 | Girth-hitches around hammock edge |
+| Pod strap | 1m of 25mm webbing (+ tri-glide or sewn loop) | $4 | Short runs to the button anchors; also the girth-hitch fallback |
+| Anti-rattle magnets (optional, Phase 4) | 4× 10×3mm N52 discs | $3 | Non-structural — holds pod flat against fabric ([doc 02](02-motor-and-winch.md)) |
 | Anchor | 25mm webbing loop + small locking carabiner | $8 | The entire railing-side hardware |
 | Wire, JST connectors, heat-shrink, TPU/PETG filament, foam pad for IMU | — | $10 | From stock, mostly |
 
 ## Printed parts (your filament)
 
 Spool, fairlead sheave + exit guide, pod enclosure (two-slot strap interface, TPU motor
-isolation grommets, splash shield, down-facing USB-C port), small line-fuse-link jig if
-you want tidy fuse loops. PETG for structure (better creep/UV than PLA); TPU for grommets
-and pads. **No railing clamp to print** — the anchor side is webbing and a carabiner.
+isolation grommets, splash shield, down-facing USB-C port), **2× button anchors (Ø30mm
+dome + collar ring — the fabric attachment, [doc 02](02-motor-and-winch.md))**, small
+line-fuse-link jig if you want tidy fuse loops. PETG for structure (better creep/UV than
+PLA); TPU for grommets and pads. **No railing clamp to print** — the anchor side is
+webbing and a carabiner.
 
 ## Grand total
 

@@ -94,6 +94,9 @@ mechanically before tuning it in firmware — but try firmware force-ramping fir
 
 ### Pod-side attachment (recap from [doc 02](02-motor-and-winch.md))
 
-25 mm webbing girth-hitched around the hammock edge through two strap slots on the pod.
-This is the load path for both the pod's weight (~0.7 kg) and the pull force (~80 N max) —
-comfortably within webbing and hammock-fabric limits when spread by the hitch.
+Two printed "button anchors" (fabric necked around a smooth dome + collar — a geometric
+interlock that tightens under load) with short webbing to the pod's two strap slots; a
+girth-hitched webbing loop around the bunched hammock edge is the universal fallback.
+This is the load path for both the pod's weight (~0.7 kg) and the pull force (~80 N max).
+Doc 02 also covers why magnets can't be the load path (friction grip in shear, sudden
+failure mode) and the one place they're worth adding (non-structural anti-rattle).

@@ -75,7 +75,8 @@ one cycle.
 | Risk | Likelihood | Mitigation |
 |---|---|---|
 | Slack-line snap loads | High (until tuned) | `T_idle` floor, pay-out velocity clamp, slack-detect + slow re-tension ([doc 05](05-firmware-and-control.md)) |
-| Pod nods/slaps hammock under motor torque | High (first strap attempt) | Two-point strap ~10 cm apart, fairlead between/below strap points, snug girth hitch ([doc 02](02-motor-and-winch.md)) |
+| Pod nods/slaps hammock under motor torque | High (first attempt) | Two button anchors ~10 cm apart, fairlead between/below attachment points; optional anti-rattle magnets in Phase 4 ([doc 02](02-motor-and-winch.md)) |
+| Button anchor slips out of thin fabric | Low–medium | Bigger dome (Ø35–40mm), or fall back to the edge girth hitch ([doc 02](02-motor-and-winch.md)) |
 | Motor noise annoys the very person relaxing | Medium–high (it's at your hip) | Helical pinion, 20 kHz PWM, TPU isolation grommets, thick enclosure walls; escape hatch: re-house the same electronics railing-side |
 | Power bank trips on current peaks | Medium | Firmware `I_max` ≤ bank rating, bulk caps, 45W+ bank if needed ([doc 04](04-electronics-and-power.md)) |
 | Pull feels jerky | Medium | Force ramps first; bungee-parallel section at the anchor as mechanical fallback ([doc 03](03-sensing-and-tether.md)) |

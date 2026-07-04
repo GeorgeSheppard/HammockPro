@@ -131,17 +131,8 @@ flowchart LR
   handles this with minimal friction and keeps the line off the enclosure edges. The spool
   and fairlead must be **fully enclosed** except for the line exit slot — this winch
   operates next to a person ([doc 08](08-safety.md)).
-- **Strapping the pod to the hammock:** use a 25 mm webbing strap girth-hitched around the
-  bunched hammock edge (works on gathered-end and spreader-bar hammocks alike, and on a
-  grommet if you have one), passing through **two strap slots ~10 cm apart** on the pod.
-  Two-point attachment is what resists the motor's torque reaction — 1 N·m per pull, which
-  on a single-point mount would make the pod nod annoyingly at every tug. The line exit
-  (fairlead) should sit between/below the strap points so pull force, strap tension, and
-  gravity hold the pod stable against the hammock body.
-- **Load path:** the strap sees the full ~80 N line load plus the pod's ~0.7 kg — trivial
-  for webbing, but spread it over a hand-width of hammock fabric (a girth-hitched loop does
-  this naturally). On very lightweight parachute-nylon hammocks, hitch around the gathered
-  end channel or add a felt/TPU pad under the strap.
+- **Attaching the pod to the hammock:** see the dedicated section below — it's the most
+  design-sensitive interface in the project.
 - **The anchor (railing side):** completely passive — a 25 mm webbing loop around a railing
   baluster or post, closed with a small locking carabiner, line tied to it (figure-8 on a
   bight). ~$6, no printing, no torque bracing, nothing to engineer. Bonus: loop it around a
@@ -158,3 +149,75 @@ flowchart LR
   down/inboard, strap slots reinforced (print orientation matters — load along layers, not
   across). Bring it inside when not in use; don't design for permanent weather exposure in
   v1.
+
+## Attaching the pod to the hammock fabric
+
+This is the most design-sensitive interface in the project, so it gets its own section.
+The requirements: carry ~80 N of cyclic pull (shear, along the fabric) plus the pod's
+~0.7 kg (gravity), on any hammock, without sewing, without damaging the fabric, with a
+failure mode that announces itself before letting go.
+
+### The load analysis that rules things in and out
+
+The pull force runs *along* the fabric plane — it's a **shear** load, arriving as a tug
+every 2.2 s, thousands of times per session. Two families of grip exist:
+
+- **Friction grips** (anything that squeezes the fabric flat between two surfaces —
+  magnets, smooth clamp plates, spring clips): shear capacity = friction coefficient ×
+  clamp force. To hold 80 N at μ ≈ 0.6 you need ~130 N of *sustained* clamping, and cyclic
+  tugs make friction grips migrate ("walk") long before outright slip.
+- **Geometric interlocks** (anything the fabric wraps around so the load path is fabric
+  tension, not surface friction — hitches, buttons, toothed jaws): capacity is set by the
+  fabric itself, and most tighten under load instead of loosening.
+
+Use an interlock for the load. Every option below is one.
+
+### ⭐ Recommended: two "button anchors" + webbing to the pod
+
+The classic no-sew way to grab fabric mid-panel (borrowed from tarp buttons / garter
+clips): push a **smooth printed dome (Ø30 mm, generous fillets, PETG)** up under the
+fabric, and snap a **printed collar ring** over the neck of fabric that forms around it.
+The fabric necks around the button and the grip is geometric — *the harder the pull, the
+tighter it holds*. Tarp versions hold tens of kilograms on ripstop nylon without damage.
+
+- Place **two buttons ~10 cm apart** at the hammock edge nearest the anchor, at hip
+  height; short webbing from each collar to the pod's two strap slots. Two points are what
+  react the motor's ~1 N·m torque pulse — a single-point mount nods at every tug.
+- Attaches anywhere on any fabric hammock (mid-panel included), removable in seconds,
+  nothing sharp, nothing sewn.
+- Design the collar snap so it *cannot* pop off under line-direction load (load the neck,
+  not the snap), and radius everything the fabric touches — a 3D printer earns its keep
+  here.
+- Fails gracefully: overload stretches fabric around the button and slips it out at loads
+  far above ours (and far below fabric tear strength), rather than releasing suddenly.
+
+### Also good: girth hitch around the bunched edge
+
+Gather a hand-width of the hammock's edge fabric into a bunch and girth-hitch a 25 mm
+webbing loop around it, through the pod's strap slots. The edge is the strongest part of
+the hammock — it already carries the occupant — and the hitch tightens under load. Zero
+printed parts; works on all gathered-end hammocks; slightly less placement freedom than
+buttons and a bit lumpier under the hip. On ultralight nylon, pad under the hitch.
+
+**Pragmatic plan:** print the buttons, pack the webbing loop as the universal fallback,
+and let Phase 2 testing pick the winner for your hammock.
+
+### About magnets (the tempting wrong tool for the load path)
+
+Magnets clamping the fabric between the two housing parts is appealing — self-aligning,
+tool-free, satisfying clunk — but they're a **friction grip loaded in shear**:
+
+- Through two layers of fabric, a neodymium pair loses roughly a third to half of its
+  rated force (magnet force falls off steeply with gap). Getting a *sustained* ~130 N of
+  clamp means four or more large N52 discs (~60 g and real pinch hazards).
+- The failure sequence under cyclic tugs is walk → slip → peel — and peel unzips a magnet
+  array almost instantly. It fails **suddenly and silently**, dropping a live winch onto
+  the occupant; webbing fails **slowly and visibly** (fraying you catch at setup
+  inspection, [doc 08](08-safety.md)). For human-attached hardware, always choose the
+  second failure mode.
+
+Where magnets *do* belong: the **convenience layer**. A pair of small discs (e.g. 10×3 mm)
+in the pod shell mating with a thin printed backing plate through the fabric will hold the
+pod flat and rattle-free against the hammock body — alignment and anti-flop while the
+buttons/strap carry every newton of load. Nice-to-have, not structural; add it in Phase 4
+if the pod fidgets.
